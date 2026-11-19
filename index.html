@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f6f5">
+  <meta name="description" content="操作系统课程项目三：磁盘调度算法可视化实验">
+  <title>磁盘调度实验 | 操作系统课程项目三</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" role="presentation">
+            <circle cx="20" cy="20" r="15"></circle>
+            <circle cx="20" cy="20" r="9"></circle>
+            <circle cx="20" cy="20" r="3"></circle>
+            <path d="M20 1.5v7M20 31.5v7M1.5 20h7M31.5 20h7"></path>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>磁盘调度实验</strong>
+          <span>操作系统课程项目三</span>
+        </span>
+      </div>
+      <div class="ready-state">
+        <span class="ready-dot" aria-hidden="true"></span>
+        <span>浏览器本地计算</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div class="intro-copy">
+          <p class="algorithm-line">FCFS · SSTF · SCAN · C-SCAN · LOOK · C-LOOK</p>
+          <h1 id="pageTitle">同一组请求，比较六种磁头调度</h1>
+          <p>设置请求序列与初始磁头，运行后查看总移动磁道、访问顺序和逐步轨迹。</p>
+        </div>
+        <div class="formula-card" aria-label="平均寻道长度计算口径">
+          <span>平均寻道长度</span>
+          <strong>总移动磁道 ÷ 请求数</strong>
+        </div>
+      </section>
+
+      <section class="setup-band" aria-label="实验设置">
+        <form id="scheduleForm" novalidate>
+          <div class="preset-block">
+            <div class="step-title">
+              <span class="step-number">01</span>
+              <div>
+                <h2>选择实验用例</h2>
+                <p>载入后仍可修改</p>
+              </div>
+            </div>
+            <div class="preset-list" id="presetList" role="group" aria-label="快速用例">
+              <button type="button" class="preset active" data-preset="classroom">课堂示例</button>
+              <button type="button" class="preset" data-preset="backforth">往返密集</button>
+              <button type="button" class="preset" data-preset="edge">边界测试</button>
+              <button type="button" class="preset" data-preset="random">随机请求</button>
+            </div>
+          </div>
+
+          <div class="parameter-block">
+            <div class="step-title">
+              <span class="step-number">02</span>
+              <div>
+                <h2>设置参数</h2>
+                <span class="input-count" id="inputCount">8 个请求</span>
+              </div>
+            </div>
+
+            <label class="field request-field">
+              <span>请求磁道</span>
+              <textarea id="requests" rows="2" spellcheck="false" inputmode="numeric" placeholder="76, 147, 42, 131, 23, 135, 59, 61">76, 147, 42, 131, 23, 135, 59, 61</textarea>
+            </label>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>初始磁头</span>
+                <input id="head" type="number" min="0" step="1" value="48">
+              </label>
+              <label class="field">
+                <span>最大磁道号</span>
+                <input id="maxTrack" type="number" min="1" max="9999" step="1" value="199">
+              </label>
+            </div>
+
+            <div class="field">
+              <span>初始方向</span>
+              <div class="segmented" id="directionControl" role="group" aria-label="初始方向">
+                <button type="button" class="active" data-direction="up">向外增大</button>
+                <button type="button" data-direction="down">向内减小</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="run-block">
+            <div class="step-title">
+              <span class="step-number">03</span>
+              <div>
+                <h2>计算并比较</h2>
+                <p>六个结果同时生成</p>
+              </div>
+            </div>
+            <button class="run-button" id="runButton" type="submit">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m8 5 11 7-11 7V5Z"></path>
+              </svg>
+              <span>运行六种算法</span>
+            </button>
+            <p class="run-hint">支持中文或英文逗号，也可用空格分隔。</p>
+          </div>
+        </form>
+        <div class="message-bar" id="messageBar" role="alert" hidden></div>
+      </section>
+
+      <section class="algorithm-section" aria-labelledby="algorithmHeading">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">结果总览</span>
+            <h2 id="algorithmHeading">算法对比</h2>
+          </div>
+          <p>单位：磁道数</p>
+        </div>
+        <div class="algorithm-tabs" id="algorithmTabs" role="tablist" aria-label="选择算法查看轨迹"></div>
+      </section>
+
+      <section class="result-sheet" aria-label="调度结果">
+        <div class="result-main">
+          <section class="chart-area" aria-labelledby="chartTitle">
+            <div class="result-heading">
+              <div>
+                <span class="section-kicker">磁头轨迹</span>
+                <h2 id="chartTitle"><span id="chartAlgorithm">SSTF</span> 的访问路径</h2>
+              </div>
+              <div class="heading-actions">
+                <span class="direction-pill" id="directionTag">向外增大</span>
+                <button type="button" class="quiet-button" id="exportButton">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"></path>
+                  </svg>
+                  导出 CSV
+                </button>
+              </div>
+            </div>
+
+            <div class="chart-legend" aria-label="轨迹图例">
+              <span><i class="legend-line visited"></i>已走路径</span>
+              <span><i class="legend-line current"></i>当前一步</span>
+              <span><i class="legend-line future"></i>后续路径</span>
+              <span><i class="legend-number">n</i>访问序号</span>
+            </div>
+
+            <div class="chart-stage" id="chartStage">
+              <svg id="diskChart" viewBox="0 0 920 450" role="img" aria-label="磁盘磁头移动轨迹图"></svg>
+            </div>
+
+            <div class="playback">
+              <div class="playback-buttons">
+                <button type="button" class="icon-button" id="prevButton" aria-label="上一步" title="上一步">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                </button>
+                <button type="button" class="play-button" id="playButton">
+                  <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"></path></svg>
+                  <span id="playLabel">播放轨迹</span>
+                </button>
+                <button type="button" class="icon-button" id="nextButton" aria-label="下一步" title="下一步">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </div>
+
+              <div class="progress-control">
+                <input type="range" id="stepSlider" min="0" max="8" value="0" aria-label="轨迹进度">
+                <span id="stepReadout">0 / 8</span>
+              </div>
+
+              <label class="speed-control">
+                <span>播放速度</span>
+                <input type="range" id="speedSlider" min="180" max="1100" value="620" step="20" aria-label="播放速度">
+              </label>
+            </div>
+          </section>
+
+          <aside class="summary-area" aria-label="当前算法摘要">
+            <div class="summary-title">
+              <div>
+                <span class="section-kicker">本次结果</span>
+                <h2 id="metricAlgorithm">SSTF</h2>
+              </div>
+              <span class="best-badge" id="bestBadge"></span>
+            </div>
+
+            <div class="total-result">
+              <span>总移动磁道</span>
+              <strong id="metricTotal">0</strong>
+            </div>
+
+            <dl class="metric-list">
+              <div>
+                <dt>平均寻道长度</dt>
+                <dd id="metricAverage">0.000</dd>
+              </div>
+              <div>
+                <dt>访问节点</dt>
+                <dd id="metricSteps">0</dd>
+              </div>
+              <div>
+                <dt>请求数量</dt>
+                <dd id="metricRequests">0</dd>
+              </div>
+            </dl>
+
+            <div class="sequence-block">
+              <span>访问顺序</span>
+              <p id="sequenceLine">—</p>
+            </div>
+          </aside>
+        </div>
+
+        <div class="result-details">
+          <section class="movement-area" aria-labelledby="movementHeading">
+            <div class="section-heading compact">
+              <div>
+                <span class="section-kicker">逐步核对</span>
+                <h2 id="movementHeading">移动明细</h2>
+              </div>
+              <p id="tableCount">—</p>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>步</th>
+                    <th>起点</th>
+                    <th>终点</th>
+                    <th>移动</th>
+                    <th>累计</th>
+                  </tr>
+                </thead>
+                <tbody id="stepTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <aside class="recent-area" aria-labelledby="recentHeading">
+            <div class="section-heading compact">
+              <div>
+                <span class="section-kicker">保存在本机</span>
+                <h2 id="recentHeading">最近实验</h2>
+              </div>
+              <button type="button" class="text-button" id="clearRecentButton">清空</button>
+            </div>
+            <div class="recent-list" id="recentList"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>SCAN 与 C-SCAN 会移动到磁道边界；LOOK 与 C-LOOK 只走到该方向最后一个请求。</span>
+      <span>C-SCAN 与 C-LOOK 的折返行程计入总移动磁道。</span>
+    </footer>
+  </div>
+
+  <script src="./assets/scheduler.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
