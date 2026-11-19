@@ -139,7 +139,8 @@ async function inspectLayout(label) {
       nodeLabels: nodes.map((node) => node.textContent.trim()),
       activeAlgorithm: document.querySelector(".algorithm-tab.active .code")?.textContent.trim(),
       total: document.getElementById("metricTotal").textContent.trim(),
-      stepReadout: document.getElementById("stepReadout").textContent.trim()
+      stepReadout: document.getElementById("stepReadout").textContent.trim(),
+      parameterBrief: document.getElementById("parameterBrief").textContent.trim()
     };
   })()`);
 }
@@ -153,6 +154,17 @@ await setViewport(1440, 1000, false);
 await navigate();
 const desktop = await inspectLayout("desktop");
 await screenshot("desktop-overview.png");
+
+await evaluate(`document.getElementById("editParamsButton").click()`);
+await waitFor("document.activeElement && document.activeElement.id === 'requests'");
+const editFocus = await evaluate(`(() => ({
+  activeElement: document.activeElement.id,
+  selectedText: document.getElementById("requests").value.slice(
+    document.getElementById("requests").selectionStart,
+    document.getElementById("requests").selectionEnd
+  )
+}))()`);
+
 await evaluate(`document.getElementById("chartStage").scrollIntoView({ block: "center" })`);
 await new Promise((resolve) => setTimeout(resolve, 250));
 await screenshot("desktop-chart.png");
@@ -187,6 +199,7 @@ const report = {
   generatedAt: new Date().toISOString(),
   baseUrl,
   desktop,
+  editFocus,
   playback,
   mobileChecks,
   diagnostics

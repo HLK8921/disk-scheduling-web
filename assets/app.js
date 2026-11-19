@@ -47,6 +47,8 @@
     directionControl: document.getElementById("directionControl"),
     inputCount: document.getElementById("inputCount"),
     presetList: document.getElementById("presetList"),
+    parameterBrief: document.getElementById("parameterBrief"),
+    editParamsButton: document.getElementById("editParamsButton"),
     runButton: document.getElementById("runButton"),
     messageBar: document.getElementById("messageBar"),
     algorithmTabs: document.getElementById("algorithmTabs"),
@@ -336,6 +338,12 @@
     elements.metricRequests.textContent = String(result.requestCount);
     elements.chartAlgorithm.textContent = result.code;
     elements.directionTag.textContent = state.data.direction === "up" ? "向外增大" : "向内减小";
+    elements.parameterBrief.textContent = [
+      "初始 " + state.data.head,
+      "范围 0–" + state.data.maxTrack,
+      state.data.direction === "up" ? "向外增大" : "向内减小",
+      "请求 " + state.data.requests.join(", ")
+    ].join(" · ");
     elements.bestBadge.textContent = result.totalMovement === best
       ? "当前最短"
       : "最短：" + bestItem.code;
@@ -766,6 +774,18 @@
   elements.form.addEventListener("submit", function submit(event) {
     event.preventDefault();
     runSimulation();
+  });
+
+  elements.editParamsButton.addEventListener("click", function editParameters() {
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelector(".setup-band").scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start"
+    });
+    window.setTimeout(function focusRequests() {
+      elements.requests.focus();
+      elements.requests.select();
+    }, reduceMotion ? 0 : 350);
   });
 
   elements.requests.addEventListener("input", updateInputCount);

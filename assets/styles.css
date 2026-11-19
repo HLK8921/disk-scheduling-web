@@ -491,6 +491,74 @@ input[type="number"]:focus {
   font-size: 10px;
 }
 
+.parameter-brief {
+  min-width: 0;
+  margin-bottom: 9px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfcfb;
+}
+
+.parameter-brief > div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.parameter-brief span {
+  flex: 0 0 auto;
+  color: var(--teal-deep);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.parameter-brief strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted-strong);
+  font-size: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.edit-parameters-button {
+  flex: 0 0 auto;
+  min-height: 27px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #a8cec7;
+  border-radius: 5px;
+  color: var(--teal-deep);
+  background: var(--teal-soft);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.edit-parameters-button:hover {
+  border-color: var(--teal);
+  background: #dff0eb;
+}
+
+.edit-parameters-button svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .algorithm-tabs {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -1349,6 +1417,31 @@ tbody tr:last-child td {
 
   .algorithm-section {
     margin-top: 22px;
+  }
+
+  .parameter-brief {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .parameter-brief > div {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .parameter-brief strong {
+    width: 100%;
+    white-space: normal;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .edit-parameters-button {
+    width: 100%;
+    justify-content: center;
   }
 
   .algorithm-tabs {
